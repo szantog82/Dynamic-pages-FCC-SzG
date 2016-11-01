@@ -1,0 +1,94 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Voting app</title>
+
+
+  <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css'>
+
+  <link rel="stylesheet" href="css/style.css">
+
+
+</head>
+
+
+<title></title>
+
+<body>
+  <div class="container">
+    <nav class="navbar navbar-inverse">
+      <div class="navbar-header">
+        <h3 id="headertitle">Voting app</h3></div>
+      <ul class="nav navbar-nav navbar-right" id ="navbar">
+        <li><a href="\signup"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+        <li><a href="\login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
+        <button id="add" class="btn btn-default" style="margin: auto">Add new element</button>
+        <div id="list"><h4 class="text-center" id="listheader"><b></b></h4>
+        </div>
+      </div>
+      <div class="col-md-2"></div>
+    </div>
+  </div>
+
+
+  <div class="container" id="addpopup">
+    <div class="row">
+      <div class="col-md-12">
+        <span class="glyphicon glyphicon-remove" id="closeadd"></span>
+        <div class="form-group">
+          <label>Question:</label>
+          <input type="text" class="form-control" id="newquestion" placeholder="Write your question here">
+        </div>
+        <div class="form-group" id="newanswers">
+          <label for="comment">Answers:</label>
+        </div>
+        <div><button id="furtheranswer">Add answer</button><button id="removeanswer">Remove last answer</button></div>
+      </div>
+      <button class="btn btn-success" id="addnew">Submit</button>
+    </div>
+    <p id="message"></p>
+  </div>
+
+  <div class="container" id="popup">
+    <div class="jumbotron">
+      <span class="glyphicon glyphicon-remove" id="close"></span>
+      <div class="row">
+        <div class="col-md-6">
+          <h4 id="question">The question is...:</h4>
+          <div class="dropdown">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="menu" data-toggle="dropdown">Choose an answer
+  <span class="caret"></span></button>
+            <ul class="dropdown-menu" id="dropdown">
+            </ul>
+          </div>
+          <button class="btn btn-success" style="margin-top: 10px" id="submitvote">submit</button>
+              <p id="submitmessage"></p>
+        </div>
+        <div class="col-md-6">
+          <h4 class="text-center">Statistics</h4>
+          <div><canvas id="stat" /></div>
+          <p id="stattext"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="container" id="aggregatediv"></div>
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+  <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js'></script>
+
+  <script src="js/index.js"></script>
+
+
+</body>
+
+</html>

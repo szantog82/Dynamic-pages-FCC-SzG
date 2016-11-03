@@ -1,0 +1,27 @@
+.props {
+  display: inline-block;
+  position: relative;
+  width: 150px;
+  min-height: 150px;
+  background-color: chocolate;
+  border-radius: 5%;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+.name {
+  color: white;
+  text-align: center;
+}
+
+.remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 12px;
+}
+
+.remove:hover {
+  background-color: red;
+  cursor: pointer;
+}

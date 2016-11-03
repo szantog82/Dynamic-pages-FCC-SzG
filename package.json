@@ -13,7 +13,9 @@
     "jsonwebtoken": "*",
     "crypto": "*",
     "cookie-parser": "*",
-    "request": "*"
+    "request": "*",
+    "socket.io": "*",
+    "http": "*"
 	},
 	"engines": {
 		"node": "4.4.3"

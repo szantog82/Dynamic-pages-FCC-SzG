@@ -7,6 +7,8 @@ var jwt = require('jsonwebtoken');
 var crypto = require('crypto');
 var cookieParser = require('cookie-parser')
 var request = require('request')
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 var d = new Date();
 var secret = "blablabla";
@@ -443,7 +445,80 @@ app.get('/nightlife/delparticipate', function(req, res){
         })
 })
 
+//
+// CHART THE STOCK MARKET
+//
 
-var listener = app.listen(process.env.PORT, function () {
+app.get('/stock/', function(req, res){
+  res.sendFile(__dirname + '/views/stock/index.html')
+})
+
+app.get('/stock/getdatas', function(req, res){
+  
+  request({
+    method: 'GET',
+    url: "http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json?parameters={Normalized:false,NumberOfDays:365,DataPeriod:'Day',Elements:[{Symbol:'RGNX',Type:'price',Params:['ohlc']}]}",
+  }, function (error, response, body) {
+        if (error) console.log (error);
+        var arr = [];
+        var respbody = JSON.parse(body).Dates;
+        for (var i = 0; i < respbody.length; i++) {
+          var d = Date.parse(respbody[i])
+          arr[i] = [d,JSON.parse(body).Elements[0].DataSeries.close.values[i]]
+        }
+        request({
+          method: 'GET',
+          url: "http://dev.markitondemand.com/MODApis/Api/v2/Lookup/json?input=rgnx",
+        }, function (err, resp, props) {
+            if (err) console.log (err);
+            var output = {props: JSON.parse(props), datas: arr}
+            res.send(output)
+        })
+  })
+})
+
+io.on('connection', function(socket){
+  socket.on("new chart", function(input){
+    request({
+          method: 'GET',
+          url: "http://dev.markitondemand.com/MODApis/Api/v2/Lookup/json?input=" + input,
+        }, function (err, resp, properties) {
+            if (err) console.log (err);
+            if (properties.length < 4) io.emit("chart update", "Symbol not found");
+            else {
+              var props = JSON.parse(properties);
+              console.log("Stock app - sending data for: " + props[0].Symbol)
+              request({                  
+                  method: 'GET',
+                  url: "http://dev.markitondemand.com/MODApis/Api/v2/InteractiveChart/json?parameters={Normalized:false,NumberOfDays:365,DataPeriod:'Day',Elements:[{Symbol:'" + input + "',Type:'price',Params:['ohlc']}]}",
+              },  function (error, response, body) {
+                  if (error) console.log (error);
+                  var arr = [];
+                  if (/DOCTYPE/.test(body)) io.emit("chart update", "Symbol not found")
+                  else {
+                      var respbody = JSON.parse(body).Dates;
+                      for (var i = 0; i < respbody.length; i++) {
+                          var d = Date.parse(respbody[i])
+                          arr[i] = [d,JSON.parse(body).Elements[0].DataSeries.close.values[i]]
+                      }
+                      var output = {props: props[0], datas: arr}
+                      io.emit("chart update", output);
+                  }
+            })
+            }
+  });
+});
+  socket.on("del chart", function(symbol){
+    console.log("Removing symbol: " + symbol + " series...")
+    io.emit("del chart emitted", symbol)
+  })
+});
+
+
+var listener = http.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
+
+/*var listener = app.listen(process.env.PORT, function () {
+  console.log('Your app is listening on port ' + listener.address().port);
+});*/

@@ -514,6 +514,329 @@ io.on('connection', function(socket){
   })
 });
 
+//
+// BOOK TRADING CLUB APP
+//
+
+app.get('/book', function(req, res){
+  res.sendFile(__dirname + '/book/index.html')
+})
+
+app.get('/book/all', function(req, res){
+  mongodb.MongoClient.connect(uri, function(err, db) {
+            if (err) throw err;
+        var users = db.collection('users');
+        users.find({}).toArray(function(err, data) {
+              if (err) throw err;
+              var output = {};
+              for (var i = 0; i < data.length; i++) {
+                if (data[i].mybooks == undefined) mybooks = [];
+                else {output[data[i].login] = data[i].mybooks}
+              }
+              res.send(output);
+              db.close();
+        })
+  })
+})
+
+app.get('/book/my', function(req, res){
+  var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+               var user = decoded.data;
+               mongodb.MongoClient.connect(uri, function(err, db) {
+                  if (err) throw err;
+                  var users = db.collection('users');
+                  users.find({login: user}).toArray(function(err, data) {
+                      if (err) throw err;
+                      var output = {};
+                      output.lent = data[0].lent;
+                          if (data[0].mybooks == undefined) mybooks = [];
+                          else {output[data[0].login] = data[0].mybooks}
+                      res.send(output);
+                      db.close();
+                  })
+              })
+            }
+        })
+})
+
+app.get('/book/profile', function(req, res){
+  var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+               var user = decoded.data;
+               mongodb.MongoClient.connect(uri, function(err, db) {
+                  if (err) throw err;
+                  var users = db.collection('users');
+                  users.find({login: user}).toArray(function(err,data){
+                  var output = {};
+                  if (data[0].fullname === undefined) output["fullname"] = "";
+                  else output["fullname"] = data[0].fullname
+                  if (data[0].address === undefined) output["address"] = "";
+                  else output["address"] = data[0].address
+                  if (data[0].city === undefined) output["city"] = "";
+                  else output["city"] = data[0].city
+                  if (data[0].state === undefined) output["state"] = "";
+                  else output["state"] = data[0].state
+                  res.send(output)
+                  })
+               })
+             }
+        })
+})
+
+app.post('/book/profileupdate', function(req, res){
+  var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+               var user = decoded.data;
+               mongodb.MongoClient.connect(uri, function(err, db) {
+                  if (err) throw err;
+                  var users = db.collection('users');
+                  users.update({login: user}, {$set: req.body})
+                  console.log("Book - profile updated for " + user)
+                  res.end()
+               })
+             }
+        })
+})
+
+app.get('/book/borrowit', function(req, res){
+   var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+               var user = decoded.data;
+               var isbn = Object.keys(req.query)[0];
+               var owner = req.query[isbn].owner;
+               var dataforborrower = {};
+               dataforborrower = req.query;
+               var dataforlender = {};
+               dataforlender = req.query;
+               dataforlender["lend"] = user;
+               mongodb.MongoClient.connect(uri, function(err, db) {
+                  if (err) throw err;
+                  var users = db.collection('users');
+                  var already = false;
+                  users.find({login: user}).toArray(function(err,data){
+                    if (data[0].borrow !== undefined) {
+                        for (var y = 0; y < data[0].borrow.length; y++) {
+                          if (data[0].borrow[y] == undefined || data[0].borrow[y] == null) {}
+                          else if (isbn === Object.keys(data[0].borrow[y])[0]) already = true;
+                        }
+                    }
+                    if (already) console.log("already pending borrowing")
+                    else {
+                      users.update({login: user}, {$addToSet:{borrow: dataforborrower}});
+                      users.update({login: owner}, {$addToSet:{lend: dataforlender}});
+                      console.log("Borrowing of " + isbn + " from " + owner + " to " + user + " started")
+                    }
+                  })
+               })
+             }
+          })
+  res.end()
+})
+
+app.get('/book/giveback', function(req, res){
+  var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+               var user = decoded.data;
+               var isbn = Object.keys(req.query)[0];
+               var owner = req.query[isbn].owner;
+               var holder = {};
+               holder["lent." + isbn] = req.query[isbn];
+               mongodb.MongoClient.connect(uri, function(err, db) {
+                  if (err) throw err;
+                  var users = db.collection('users');
+                  users.update({login: user}, {$unset: holder})
+                  var holderforowner = {};
+                  holderforowner["mybooks." + isbn + ".borrowed"] = "";
+                  users.update({login: owner}, {$set: holderforowner});
+                  console.log("Book - book isbn: " + isbn + " given back from " + user + " to " + owner);
+                  res.end();
+               })
+             }
+        })
+  
+})
+
+app.get('/book/approval', function(req, res){
+  var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+               var user = decoded.data;
+               mongodb.MongoClient.connect(uri, function(err, db) {
+                  if (err) throw err;
+                  var users = db.collection('users');
+                  var already = false;
+                  users.find({login: user}).toArray(function(err,data){
+                    var output = {};
+                    output["borrow"] = data[0].borrow;
+                    output["lend"] = data[0].lend;
+                    res.send(output)
+                  })
+               })
+             }
+          })
+})
+
+app.post('/book/approved', function(req, res){
+  var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+               var user = decoded.data;
+               var keys = Object.keys(req.body);
+               for (var a = 0; a < keys.length; a++) {
+                 var lender = req.body[keys[a]]["lender"];
+                 var isbn = keys[a];
+                 if (req.body[keys[a]]["feedback"] === "Accepted!") {
+                   mongodb.MongoClient.connect(uri, function(err, db) {
+                      if (err) throw err;
+                      var pos;
+                      var users = db.collection('users');
+                       users.find({login: user}).toArray(function(err, data){
+                         if (err) console.log(err)
+                        var bookprops = data[0].mybooks[isbn];
+                        var collection = {};
+                        collection["title"] = bookprops.title;
+                        collection["authors"] = bookprops.authors;
+                        collection["publishedDate"] = bookprops["publishedDate"];
+                        collection["description"] = bookprops.description;
+                        collection["thumbnail"] = bookprops["thumbnail"];
+                        collection["borrowed"] = lender;
+                        collection["owner"] = user;
+                        var holderforborrower = {};
+                        var holderforlender = {};
+                        holderforborrower["mybooks." + isbn] = collection;
+                        holderforlender["lent." + isbn] = collection;
+                        users.update({login: user}, {$set: holderforborrower})
+                        users.update({login: lender}, {$set: holderforlender})
+                        var pos=0;
+                        users.find({login: lender}).toArray(function(err, data1){
+                         if (err) console.log(err)
+                           for (var i = 0; i < data1[0].borrow.length; i++) {
+                             if (data1[0].borrow[i] === null || data1[0].borrow[i] === undefined) {}
+                            else if (Object.keys(data1[0].borrow[i])[0] === isbn) pos = i;
+                           }
+                           var holder = {};
+                           holder["borrow." + pos] = "";
+                           users.update({login: lender}, {$unset: holder})
+                           users.find({login: user}).toArray(function(err, dataa){
+                              if (err) console.log(err)
+                                 for (var i = 0; i < dataa[0].lend.length; i++) {
+                                   if (dataa[0].lend[i] === null || dataa[0].lend[i] === undefined) {}
+                                   else if (Object.keys(dataa[0].lend[i])[0] === isbn) pos = i;
+                                 }
+                                var holder = {};
+                                holder["lend." + pos] = "";
+                                var users = db.collection('users');
+                                users.update({login: user}, {$unset: holder});
+                                console.log("Book - Accepted isbn: " + isbn + ", by: " + user + ", received: " + lender)
+                             db.close();
+                             res.end()
+                           })
+                       })
+                       })
+                   })
+                 }
+                 
+                 else if (req.body[keys[a]]["feedback"] === "Rejected!") {
+                      mongodb.MongoClient.connect(uri, function(err, db) {
+                      if (err) throw err;
+                      var pos;
+                      var users = db.collection('users');
+                       users.find({login: lender}).toArray(function(err, data){
+                         if (err) console.log(err)
+                           for (var i = 0; i < data[0].borrow.length; i++) {
+                              if (Object.keys(data[0].borrow[i])[0] === isbn) pos = i;
+                           }
+                           var holder = {};
+                           holder["borrow." + pos] = "";
+                           users.update({login: lender}, {$unset: holder})
+                           users.find({login: user}).toArray(function(err, dataa){
+                              if (err) console.log(err)
+                                 for (var i = 0; i < dataa[0].lend.length; i++) {
+                                   if (Object.keys(dataa[0].lend[i])[0] === isbn) pos = i;
+                                 }
+                                var holder = {};
+                                holder["lend." + pos] = "";
+                                var users = db.collection('users');
+                                users.update({login: user}, {$unset: holder});
+                                console.log("Book - Rejected isbn: " + isbn + ", by: " + user + " (would have been received: " + lender + ")")
+                             db.close();
+                             res.end()
+                           })
+                       })
+                  })
+              }
+            }
+         }
+    })
+})
+
+app.get('/book/new', function(req, res){
+  var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+               var user = decoded.data;
+                mongodb.MongoClient.connect(uri, function(err, db) {
+                if (err) throw err;
+                var users = db.collection('users');
+                var actisbn = req.query.isbn;
+                users.find({login: user}).toArray(function(err, data){
+                  var arr = Object.keys(data[0].mybooks);
+                 if (arr.indexOf(actisbn) > -1) console.log("Book - duplicate danger; " + actisbn + " was not added twice to " + user)
+                 else {               
+                    var collection = {}
+                    var url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + actisbn;
+                  request(url, function (error, response, body) {
+                      if (error) console.log(error)
+                      collection["borrowed"] = ""
+                      collection["title"] = JSON.parse(body).items[0]["volumeInfo"].title;
+                      collection["authors"] = JSON.parse(body).items[0]["volumeInfo"].authors;
+                      collection["publishedDate"] = JSON.parse(body).items[0]["volumeInfo"]["publishedDate"];
+                      if (JSON.parse(body).items[0]["volumeInfo"].description === null || JSON.parse(body).items[0]["volumeInfo"].description === undefined) collection["description"] = "";
+                      else collection["description"] = JSON.parse(body).items[0]["volumeInfo"].description;
+                      collection["thumbnail"] = JSON.parse(body).items[0]["volumeInfo"]["imageLinks"]["thumbnail"];
+                      var holder = {};
+                      holder["mybooks." + actisbn] = collection;
+                      users.update({login: user}, {$set: holder})
+                      console.log("Book - " + actisbn + " added to " + user + "'s collection" )
+                      res.end();
+                  })
+                 }
+              })
+            })
+          }
+    })
+})
+
 
 var listener = http.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);

@@ -11,7 +11,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 var d = new Date();
-var secret = "blablabla";
+var secret = process.env.SECRET;
 var token = "";
 uri = "mongodb://" + process.env.PASS + "@ds033966.mlab.com:33966/szantog82";
 

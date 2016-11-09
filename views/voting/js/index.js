@@ -274,7 +274,7 @@ if (username.length > 1) {
   loggedin = true;
   $("#navbar").empty();
   $("#navbar").append("<li><a href='#'>Hello " + username + "</a></li>")
-  $("#navbar").append("<li><a href='\logout'><span class='glyphicon glyphicon-log-out'></span> Logout</a></li>")
+  $("#navbar").append("<li><a href='/logout'><span class='glyphicon glyphicon-log-out'></span> Logout</a></li>")
   $("<button class='btn btn-default' style='margin-left: 20px' id='mypolls'>My polls</button>").insertAfter("#add")
   $("<button class='btn btn-default' style='margin-left: 20px' id='allpolls'>All polls</button>").insertAfter("#add")
   $("<button class='btn btn-default' style='margin-left: 20px' id='aggregate'>Aggregate my polls</button>").insertAfter("#mypolls")

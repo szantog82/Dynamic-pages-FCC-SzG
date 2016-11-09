@@ -8,7 +8,23 @@
 
   <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css'>
 
+<style>
+#descr {
+  position: relative;
+  left: 40%;
+  top: -200px;
+  width: 500px;
+  min-height: 200px;
+  border: 2px solid chocolate;
+  border-radius: 5%;
+  padding: 10px;
+  visibility: hidden;
+}
 
+h3 {
+  margin-left: 100px;
+}
+</style>
 </head>
 
 
@@ -23,10 +39,12 @@
     </nav>
   </div>
 
-<h3><a href="/voting">Click here to visit the Voting app</a></h3>
-<h3><a href="/nightlife">Click here to visit the Nightlife app</a></h3>
-<h3><a href="/stock">Click here to visit the 'Chart the stock market' app</a></h3>
-<h3><a href="/book">Click here to visit the 'Book trading club' app</a></h3>
+<h3><a href="/voting">Voting app</a></h3>
+<h3><a href="/nightlife">Nightlife app</a></h3>
+<h3><a href="/stock">'Chart the stock market' app</a></h3>
+<h3><a href="/book">'Book trading club' app</a></h3>
+<div id="descr"></div>
 </body>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
 <script src="js/index.js"></script>
 </html>

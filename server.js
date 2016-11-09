@@ -48,7 +48,7 @@ app.get('/signup', function(req,res){
 app.post('/signup', function(req, res){
   loginmatch = false;
   var login = req.body.login;
-  var password = req.body.login;
+  var password = req.body.password;
   if (login.length < 5 || password.length < 5) {
     res.send("<html><body><p>Too short login/password - try again - redirecting to back...</p></body><script>setTimeout(function(){window.location = '/signup'},1000)</script></html>")
   }

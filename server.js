@@ -690,9 +690,11 @@ app.get('/book/approval', function(req, res){
                   var users = db.collection('users');
                   var already = false;
                   users.find({login: user}).toArray(function(err,data){
-                    var output = {};
-                    output["borrow"] = data[0].borrow;
-                    output["lend"] = data[0].lend;
+                   var output = {};
+                    if (data[0].borrow === undefined) output["borrow"] = [];
+                    else output["borrow"] = data[0].borrow;
+                    if (data[0].lend === undefined) output["lend"] = [];
+                    else output["lend"] = data[0].lend;
                     res.send(output)
                   })
                })

@@ -30,7 +30,7 @@ var loaddata = function(url) {
       var arr = []
       var lentbooks = [];
       if (url === "/book/all") cont = data;
-      if (url  === "/book/my") lentdata = data;
+      if (url === "/book/my") lentdata = data;
       if (data.lent === undefined) lentbooks = [""];
       else lentbooks = Object.keys(data.lent);
       for (var a = 0; a < users.length; a++) {
@@ -63,6 +63,8 @@ var loaddata = function(url) {
             var borrowedto = allbooks[isbn].borrowed;
             if (borrowedto !== "" && mybooks) {
               $("#borrowed").append("<div class='item'><div class='isbn'>" + isbn + "</div><img class='thumb' src='" + thumbnail + "' /><p class='title'>" + title + "</p><p class='owner'>Owner: <span class='user'>" + users[a] + "</span></p><div class='descr'>" + description + "</div><div class='borrow'><button class='btn btn-default btn-sm borrowit'>Borrow it!</button></div><div class='borrowed'>Borrowed to: " + borrowedto + "</div></div>")
+            } else if (borrowedto !== "") {
+              $("#borrowed").append("<div class='item'><div class='isbn'>" + isbn + "</div><img class='thumb' src='" + thumbnail + "' /><p class='title'>" + title + "</p><p class='owner'>Owner: <span class='user'>" + users[a] + "</span></p><div class='descr'>" + description + "</div><div class='borrowed'>Borrowed to: " + borrowedto + "</div></div>")
             } else {
               $("#main").append("<div class='item'><div class='isbn'>" + isbn + "</div><img class='thumb' src='" + thumbnail + "' /><p class='title'>" + title + "</p><p class='owner'>Owner: <span class='user'>" + users[a] + "</span></p><div class='descr'>" + description + "</div><div class='borrow'><button class='btn btn-default btn-sm borrowit'>Borrow it!</button></div></div>")
             }
@@ -96,26 +98,26 @@ var loaddata = function(url) {
           success: function(data, status) {
             alert("Borrowing started!")
             setTimeout(function() {
-            location.reload(true)
-          }, 800);
+              location.reload(true)
+            }, 800);
           }
         })
       })
 
-$("#lent").on("mouseover", ".item", function() {
-  $(this).find(".giveback").css("display", "inline")
-})
+      $("#lent").on("mouseover", ".item", function() {
+        $(this).find(".giveback").css("display", "inline")
+      })
 
-$("#lent").on("mouseleave", ".item", function() {
-  $(this).find(".giveback").css("display", "none")
-})
+      $("#lent").on("mouseleave", ".item", function() {
+        $(this).find(".giveback").css("display", "none")
+      })
 
-$(".givebackbutton").click(function(){
-  var thisisbn = $(this).parent().parent().find(".isbn").text()
-  var owner = $(this).parent().parent().find(".user").text()
-   var thisbook = {};
-   thisbook[thisisbn] = lentdata.lent[thisisbn];
-    $.ajax({
+      $(".givebackbutton").click(function() {
+        var thisisbn = $(this).parent().parent().find(".isbn").text()
+        var owner = $(this).parent().parent().find(".user").text()
+        var thisbook = {};
+        thisbook[thisisbn] = lentdata.lent[thisisbn];
+        $.ajax({
           url: '/book/giveback',
           type: 'GET',
           headers: {
@@ -125,11 +127,11 @@ $(".givebackbutton").click(function(){
           success: function(data, status) {
             alert("Book given back!")
             setTimeout(function() {
-            location.reload(true)
-          }, 800);
+              location.reload(true)
+            }, 800);
           }
         })
-})
+      })
 
     }
   })
@@ -169,8 +171,8 @@ $("#mybooks").click(function() {
 })
 
 $("#navleft").on("click", "#approval", function() {
-  $("#modalbody").empty();
   $("#save").css("visibility", "visible");
+  $("#modalbody").empty();
   $.ajax({
     url: "/book/approval",
     type: "GET",
@@ -205,8 +207,8 @@ $("#navleft").on("click", "#approval", function() {
 })
 
 $("#navleft").on("click", "#addnew", function() {
-  $("#modalbody").empty();
   $("#save").css("visibility", "visible");
+  $("#modalbody").empty();
   $("#modaltitle").text("Add new book")
   $("#modalbody").append("<p>Enter ISBN here: <input type='text' id='searchfield'><button class='btn btn-default' id='search'>Search</button></p>")
   $("#modalbody").append("<p id='addnewmessage'></p>")
@@ -263,13 +265,13 @@ $("#navleft").on("click", "#profile", function() {
       url: '/book/profileupdate',
       type: "POST",
       headers: {
-      "token": document.cookie
-    },
-    data: output,
-    success: function(data, status) {
-      alert("Data updated")
-    }
-      
+        "token": document.cookie
+      },
+      data: output,
+      success: function(data, status) {
+        alert("Data updated")
+      }
+
     })
   })
 

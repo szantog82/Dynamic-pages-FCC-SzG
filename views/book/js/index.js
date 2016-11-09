@@ -170,6 +170,7 @@ $("#mybooks").click(function() {
 
 $("#navleft").on("click", "#approval", function() {
   $("#modalbody").empty();
+  $("#save").css("visibility", "visible");
   $.ajax({
     url: "/book/approval",
     type: "GET",
@@ -205,6 +206,7 @@ $("#navleft").on("click", "#approval", function() {
 
 $("#navleft").on("click", "#addnew", function() {
   $("#modalbody").empty();
+  $("#save").css("visibility", "visible");
   $("#modaltitle").text("Add new book")
   $("#modalbody").append("<p>Enter ISBN here: <input type='text' id='searchfield'><button class='btn btn-default' id='search'>Search</button></p>")
   $("#modalbody").append("<p id='addnewmessage'></p>")

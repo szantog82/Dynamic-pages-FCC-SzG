@@ -15,7 +15,8 @@
     "cookie-parser": "*",
     "request": "*",
     "socket.io": "*",
-    "http": "*"
+    "http": "*",
+    "randomstring": "*"
 	},
 	"engines": {
 		"node": "4.4.3"

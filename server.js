@@ -9,6 +9,7 @@ var cookieParser = require('cookie-parser')
 var request = require('request')
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var randomstring = require("randomstring");
 
 var d = new Date();
 var secret = process.env.SECRET;
@@ -690,7 +691,7 @@ app.get('/book/approval', function(req, res){
                   var users = db.collection('users');
                   var already = false;
                   users.find({login: user}).toArray(function(err,data){
-                   var output = {};
+                    var output = {};
                     if (data[0].borrow === undefined) output["borrow"] = [];
                     else output["borrow"] = data[0].borrow;
                     if (data[0].lend === undefined) output["lend"] = [];
@@ -840,6 +841,76 @@ app.get('/book/new', function(req, res){
 })
 
 
+//
+// PINTEREST CLONE APP
+//
+
+app.get('/pin', function(req, res){
+  res.sendFile(__dirname + "/views/pin/index.html")
+})
+
+app.get('/pin/mypins', function(req, res){
+  var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+               var user = decoded.data;
+               mongodb.MongoClient.connect(uri, function(err, db) {
+                if (err) throw err;
+                var users = db.collection('users');
+                users.find({login: user}).toArray(function(err, data){
+                  var output = {};
+                if (data[0].mypins === undefined || data[0].mypins === undefined) {}
+                else output = data[0].mypins;
+                db.close();
+                res.send(output)
+                })
+               })
+             }
+          })
+})
+
+app.get('/pin/allpins', function(req, res){
+   mongodb.MongoClient.connect(uri, function(err, db) {
+                if (err) throw err;
+                var users = db.collection('users');
+                var output = {};
+                users.find({}).toArray(function(err, data){
+                  for (var a = 0; a < data.length; a++) {
+                    for (var props in data[a].mypins) {
+                      output[props] = data[a].mypins[props]
+                    }
+                  }
+                  db.close();
+                  res.send(output);
+                })
+   })
+})
+
+app.post('/pin/newpin', function(req, res){
+  var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+              var user = decoded.data;
+              var holder = {};
+              holder["mypins." + randomstring.generate(10)] = req.body;
+              mongodb.MongoClient.connect(uri, function(err, db) {
+                if (err) throw err;
+                var users = db.collection('users');
+                users.update({login: user}, {$set: holder});
+                db.close();
+              res.send("ok")
+              console.log("Pin - New pin added")
+              })
+             }
+          })
+})
+
 var listener = http.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
@@ -847,3 +918,4 @@ var listener = http.listen(process.env.PORT, function () {
 /*var listener = app.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });*/
+

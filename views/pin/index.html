@@ -1,0 +1,92 @@
+<html>
+  <head>
+<title>Pinterest clone app</title>
+<link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css'>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="css/style.css">
+  </head>
+
+
+<body>
+  <div class="container" id="header">
+    <nav class="navbar navbar-inverse">
+      <div class="navbar-header">
+        <h3 style="color: white">Pinterest clone app</h3></div>
+      <ul class="nav navbar-nav" id="menu">
+        <li><a href="#" id="mypins">My pins</a></li>
+        <li><a href="#" id="allpins">All pins</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right" id="navbar">
+        <li><a href="\signup"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+        <li id="login"><a href="\login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+      </ul>
+    </nav>
+    <p><a href="/">Homepage</a></p>
+
+    <button type="button" class="btn btn-default" id="add_tab" data-toggle="modal" data-target="#myModal">Add Tab</button>
+    <div class="modal fade" id="myModal" role="dialog">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title" id="modaltitle">New tab name</h4>
+          </div>
+          <div class="modal-body" id="modalbody">
+            <input type="text" class="form-control" id="newtab" placeholder="New tab" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="ok">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="pinModal" role="dialog">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title" id="pinmodaltitle"></h4>
+          </div>
+          <div class="modal-body" id="pinmodalbody">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="pinclose">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="addnewpinModal" role="dialog">
+      <div class="modal-dialog modal-md">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title" id="addnewpinmodaltitle">Add new pin</h4>
+          </div>
+          <div class="modal-body" id="addnewpinmodalbody">
+            <div><img id="addnewpinimg" src="" /></div>
+            Title: <input type="text" class="form-control" id="newpintitle" placeholder="Title comes here" /> Image: <input type="url" class="form-control" id="newpinpic" placeholder="http://example.com/sample.jpg" /> Webpage: <input type="url" class="form-control"
+              id="newpinlink" placeholder="http://example.com" /> Description (optional): <textarea class="form-control" rows="5" id="newpindescr" placeholder="Description comes here..."></textarea>
+            <p id="addnewpinmessage"></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-success" id="addnewpinsave">Save</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="addnewpinclose">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="tabs">
+     <ul id="entries">
+      </ul>
+    </div>
+  </div>
+</body>
+
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js'></script>
+<script src='https://code.jquery.com/ui/1.12.1/jquery-ui.min.js'></script>
+<script src='js/masonry.js'></script>
+
+<script src="js/index.js"></script>
+
+</html>

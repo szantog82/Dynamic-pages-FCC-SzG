@@ -1,0 +1,144 @@
+.container {
+  width: 90%;
+}
+
+#menu li {
+  left: 200px;
+  font-size: 20px;
+  margin-right: 100px;
+}
+
+.ui-icon-close {
+  cursor: pointer;
+}
+
+.field {
+  position: relative;
+  min-height: 600px;
+}
+
+.pin {
+  position: relative;
+  display: inline-block;
+  min-width: 100px;
+  max-width: 420px;
+  min-height: 100px;
+  max-height: 420px;
+  margin: 5px;
+  padding: 10px;
+  border-radius: 8%;
+}
+
+.pin:hover {
+  background-color: #cccccc;
+  cursor: zoom-in;
+}
+
+.pinit {
+  position: absolute;
+  z-index: 20;
+  opacity: 0.8;
+  top: 10px;
+  right: 15px;
+  background-color: #AA0F0F;
+  color: white;
+  visibility: hidden;
+}
+
+.pinit:hover {
+  background-color: #420303;
+}
+
+.unpinit {
+  position: absolute;
+  z-index: 20;
+  opacity: 0.8;
+  top: 10px;
+  left: 15px;
+  background-color: #AA0F0F;
+  color: white;
+  visibility: hidden;
+}
+
+.unpinit:hover {
+  background-color: #420303;
+}
+
+.addnewpin {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.pin h4 {
+  max-width: 150px;
+}
+
+.image img {
+  display: block;
+  min-width: 100px;
+  min-height: 150px;
+  max-width: 320px;
+  max-height: 320px;
+  margin: auto;
+  left: 0;
+  right: 0;
+  border-radius: 20%;
+}
+
+.pin a {
+  position: absolute;
+  display: block;
+  margin: 10px;
+  left: 0;
+  right: 0;
+  top: 30%;
+  text-align: center;
+  font-size: 12px;
+  color: white;
+  background-color: #616161;
+  font-weight: bold;
+  opacity: 0.8;
+  z-index: 25;
+  visibility: hidden;
+}
+
+.pin .description {
+  display: none;
+}
+
+#pinmodaltitle {
+  position: relative;
+}
+
+#pinmodalbody img {
+  display: block;
+  max-width: 600px;
+  max-height: 600px;
+  margin: auto;
+  left: 0;
+  right: 0;
+}
+
+#addnewpinmodalbody {
+  padding-right: 40px;
+}
+
+#addnewpinmodalbody input {
+  margin: 10px;
+}
+
+#addnewpinmessage {
+  color: #043E02;
+  font-size: 16px;
+  margin-left: 10%;
+}
+
+#addnewpinimg {
+  display: block;
+  max-width: 300px;
+  max-height: 300px;
+  margin: auto;
+  left: 0;
+  right: 0;
+}

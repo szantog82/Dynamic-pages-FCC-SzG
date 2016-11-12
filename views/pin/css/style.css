@@ -2,6 +2,19 @@
   width: 90%;
 }
 
+#mainmessage {
+  position: absolute;
+  margin: auto;
+  font-size: 18px;
+  padding: 3px;
+  left: 45%;
+  top: 100px;
+  z-index: 30;
+  background-color: #514401;
+  color: white;
+  opacity: 0;
+}
+
 #menu li {
   left: 200px;
   font-size: 20px;
@@ -23,7 +36,7 @@
   min-width: 100px;
   max-width: 420px;
   min-height: 100px;
-  max-height: 420px;
+  max-height: 450px;
   margin: 5px;
   padding: 10px;
   border-radius: 8%;
@@ -32,6 +45,10 @@
 .pin:hover {
   background-color: #cccccc;
   cursor: zoom-in;
+}
+
+.id {
+  display: none;
 }
 
 .pinit {
@@ -64,6 +81,22 @@
   background-color: #420303;
 }
 
+.changeflag {
+  position: absolute;
+  z-index: 20;
+  opacity: 0.8;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  background-color: #0B077B;
+  color: white;
+}
+
+.changeflag:hover {
+  background-color: #04032D;
+}
+
 .addnewpin {
   position: absolute;
   top: 0;
@@ -86,7 +119,7 @@
   border-radius: 20%;
 }
 
-.pin a {
+.pin .link {
   position: absolute;
   display: block;
   margin: 10px;
@@ -138,6 +171,13 @@
   display: block;
   max-width: 300px;
   max-height: 300px;
+  margin: auto;
+  left: 0;
+  right: 0;
+}
+
+.selectnewflag {
+  display: block;
   margin: auto;
   left: 0;
   right: 0;

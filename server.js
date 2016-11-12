@@ -911,6 +911,30 @@ app.post('/pin/newpin', function(req, res){
           })
 })
 
+app.get('/pin/pinit', function(req, res){
+  var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+              var user = decoded.data;
+              var id = Object.keys(req.query)[0];
+              var holder = {};
+              holder["mypins." + id] = req.query[id];
+              console.log(holder)
+              mongodb.MongoClient.connect(uri, function(err, db) {
+                if (err) throw err;
+                var users = db.collection('users');
+                users.update({login: user}, {$set: holder});
+                db.close();
+              res.send("ok")
+              console.log("Pin - New pin added")
+              })
+             }
+          })
+})
+
 app.get('/pin/changeflag', function(req, res){
  var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
             jwt.verify(tokensent, secret, function(err, decoded) {
@@ -930,6 +954,29 @@ app.get('/pin/changeflag', function(req, res){
                 db.close();
                 res.send("ok")
                 console.log("Pin - Pin moved to another tab")
+              })
+             }
+          })
+})
+
+app.get('/pin/unpin', function(req, res){
+ var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+              var user = decoded.data;
+              mongodb.MongoClient.connect(uri, function(err, db) {
+                if (err) throw err;
+                var users = db.collection('users');
+                var holder = {};
+                var id = req.query["id"];
+                holder["mypins." + id] = "";
+                users.update({login: user}, {$unset: holder});
+                db.close();
+                res.send("ok")
+                console.log("Pin - Pin unpinned")
               })
              }
           })

@@ -911,6 +911,30 @@ app.post('/pin/newpin', function(req, res){
           })
 })
 
+app.get('/pin/changeflag', function(req, res){
+ var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+              var user = decoded.data;
+              mongodb.MongoClient.connect(uri, function(err, db) {
+                if (err) throw err;
+                var users = db.collection('users');
+                var holder = {};
+                var id = Object.keys(req.query)[0];
+                var newflag = req.query[id].flag;
+                holder["mypins." + id + ".flag"] = newflag;
+                users.update({login: user}, {$set: holder});
+                db.close();
+                res.send("ok")
+                console.log("Pin - Pin moved to another tab")
+              })
+             }
+          })
+})
+
 var listener = http.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });

@@ -4,6 +4,7 @@ var arr = [];
 var flagfornewpin;
 var mypins = false;
 var changeflagoutput = {};
+var cont;
 
 var username = document.cookie.replace(/(?:(?:^|.*;\s*)user\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 if (username.length > 1) {
@@ -39,19 +40,27 @@ var loaddata = function(url) {
           $("#" + flag).append("<div class='pin'><div class='pinmain'><div class='id'>" + props + "</div><div class='image'><img src='" + data[props].pic + "' /></div><h4 class='title'>" + data[props].title + "</h4><p class='description'>" + data[props].descr + "</p><p class='owner'><b>" + data[props].owner + "</b></p></div><button class='changeflag' data-toggle='tooltip' title='Put it to another tab'>" + flag + "</button><a class='link' href='" + data[props].link + "'>" + data[props].link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>")
         }
         for (var a = 0; a < arr.length; a++) {
-          $('#' + flag).masonry({
+          var $grid = $('#' + flag).masonry({
             itemSelector: '.pin'
           })
+          $grid.imagesLoaded().progress(function() {
+            $grid.masonry('layout');
+          });
         }
       } else {
+        cont = data;
         $("#entries").append("<li><a href='#alltabsfromallusers'>All tabs from All users</a></li>");
         $("#tabs").append("<div class='field' id='alltabsfromallusers'></div>");
         for (var props in data) { //initialize tabs
           $("#alltabsfromallusers").append("<div class='pin'><div class='pinmain'><div class='id'>" + props + "</div><div class='image'><img src='" + data[props].pic + "' /></div><h4 class='title'>" + data[props].title + "</h4><p class='description'>" + data[props].descr + "</p><p class='owner'><b>" + data[props].owner + "</b></p></div><button class='changeflag'>" + data[props].flag + "</button><a class='link' href='" + data[props].link + "'>" + data[props].link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>")
         }
-        $('#alltabsfromallusers').masonry({
+        var $grid = $('#alltabsfromallusers').masonry({
           itemSelector: '.pin'
         })
+        $grid.imagesLoaded().progress(function() {
+          $grid.masonry('layout');
+        });
+        $("#selectmenu").css("visibility", "visible");
       }
 
       if (loggedin) {
@@ -85,20 +94,26 @@ var loaddata = function(url) {
 if (loggedin) {
   mypins = true;
   $("#menu").css("visibility", "visible")
+  $("#searchfield").css("display", "none")
   loaddata("/pin/mypins")
 } else {
   $("#menu").css("visibility", "hidden")
+  $("#searchfield").css("display", "inline")
   loaddata("/pin/allpins");
 }
 
 $("#allpins").click(function() {
   mypins = false;
+  $("#add_tab").css("visibility", "hidden")
+  $("#searchfield").css("display", "inline")
   $("#tabs").tabs("destroy");
   loaddata("/pin/allpins");
 })
 
 $("#mypins").click(function() {
   mypins = true;
+  $("#searchfield").css("display", "none")
+  $("#selectmenu").css("visibility", "hidden")
   $("#tabs").tabs("destroy");
   loaddata("/pin/mypins");
 })
@@ -134,37 +149,37 @@ tabs.on("click", "span.ui-icon-close", function() {
   }
 });
 
-$("#tabs").on("click", ".pin .pinit", function(){
-    var id = $(this).parent().find(".id").text();
-    var title = $(this).parent().find(".title").text();
-    var pic = $(this).parent().find(".image img").attr("src");
-    var link = $(this).parent().find(".link").text();
-    var descr = $(this).parent().find(".description").text();
-    var flag = $(this).parent().find(".changeflag").text();
-    var owner = username;
-    var output = {};
-    output[id] = {
-      title: title,
-      pic: pic,
-      link: link,
-      descr: descr,
-      flag: flag,
-      owner: owner
-    };
-    $("#mainmessage").css("opacity", "1")
-    $("#mainmessage").text("Pinned!");
-    $.ajax({
-      url: '/pin/pinit',
-      method: "GET",
-      headers: {
-        "token": document.cookie
-      },
-      data: output,
-      success: function() {
-        $("#mainmessage").fadeTo(300, 0, function(){
+$("#tabs").on("click", ".pin .pinit", function() {
+  var id = $(this).parent().find(".id").text();
+  var title = $(this).parent().find(".title").text();
+  var pic = $(this).parent().find(".image img").attr("src");
+  var link = $(this).parent().find(".link").text();
+  var descr = $(this).parent().find(".description").text();
+  var flag = $(this).parent().find(".changeflag").text();
+  var owner = username;
+  var output = {};
+  output[id] = {
+    title: title,
+    pic: pic,
+    link: link,
+    descr: descr,
+    flag: flag,
+    owner: owner
+  };
+  $("#mainmessage").css("opacity", "1")
+  $("#mainmessage").text("Pinned!");
+  $.ajax({
+    url: '/pin/pinit',
+    method: "GET",
+    headers: {
+      "token": document.cookie
+    },
+    data: output,
+    success: function() {
+      $("#mainmessage").fadeTo(300, 0, function() {
         $("#mainmessage").text("");
       })
-      }
+    }
   })
 })
 
@@ -178,12 +193,12 @@ $("#tabs").on("click", ".pin .unpinit", function() {
     url: '/pin/unpin',
     method: 'GET',
     headers: {
-        "token": document.cookie
-      },
+      "token": document.cookie
+    },
     data: output,
-    success: function(){
-      $("#mainmessage").fadeTo(300, 0, function(){
-      $("#mainmessage").text("");
+    success: function() {
+      $("#mainmessage").fadeTo(300, 0, function() {
+        $("#mainmessage").text("");
       })
     }
   })
@@ -324,7 +339,7 @@ $("#addnewpinModal").on("click", "#addnewpinsave", function() {
           $("#addnewpinModal").modal("hide");
           var $newpin = $("<div class='pin'><div class='pinmain'><div class='image'><img src='" + pic + "' /></div><h4>" + title + "</h4><p class='description'>" + descr + "</p><p class='owner'><b>" + username + "</b></p><p>" + flagfornewpin + "</p></div><a href='" + link + "'>" + link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>");
           $("#" + flagfornewpin).append($newpin).masonry('appended', $newpin);
-      $("#changeflagModal").modal("hide");
+          $("#changeflagModal").modal("hide");
         }, 500)
       }
     })
@@ -334,4 +349,35 @@ $("#addnewpinModal").on("click", "#addnewpinsave", function() {
 $("#addnewpinModal").on("blur", "#newpinpic", function() {
   var pic = $("#newpinpic").val();
   $("#addnewpinimg").attr("src", pic)
+})
+
+$("#searchbutton").click(function() {
+  var search = $("#search").val();
+  if (search.length > 2) {
+    $("#search").val("");
+    var keyword = new RegExp(search.toLowerCase());
+    var count = 0;
+    $("#tabs").append("<div class='field' id='" + search + "'></div>");
+    for (var props in cont) {
+      if (keyword.test(cont[props].title.toLowerCase()) || keyword.test(cont[props].descr.toLowerCase())) {
+        $("#" + search).append("<div class='pin'><div class='pinmain'><div class='id'>" + props + "</div><div class='image'><img src='" + cont[props].pic + "' /></div><h4 class='title'>" + cont[props].title + "</h4><p class='description'>" + cont[props].descr + "</p><p class='owner'><b>" + cont[props].owner + "</b></p></div><button class='changeflag'>" + cont[props].flag + "</button><a class='link' href='" + cont[props].link + "'>" + cont[props].link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>")
+        count++;
+      }
+    }
+    if (count === 0) {
+      alert("No hits found")
+      $("#" + search).remove();
+    } else {
+      $("#tabs").tabs("destroy");
+      $("#entries").append("<li><a href='#" + search + "'>" + search + "</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+      var $grid = $('#' + search).masonry({
+        itemSelector: '.pin'
+      })
+      $grid.imagesLoaded().progress(function() {
+        $grid.masonry('layout');
+      });
+      $("#tabs").tabs();
+      $("#tabs").tabs("option", "active", $("#entries li").length - 1);
+    }
+  }
 })

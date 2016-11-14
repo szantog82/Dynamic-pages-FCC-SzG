@@ -16,7 +16,9 @@
     "request": "*",
     "socket.io": "*",
     "http": "*",
-    "randomstring": "*"
+    "randomstring": "*",
+    "fs": "*",
+    "connect-multiparty": "*"
 	},
 	"engines": {
 		"node": "4.4.3"

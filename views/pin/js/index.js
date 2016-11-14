@@ -141,11 +141,19 @@ $("#tabs").on("mouseleave", ".pin", function() {
 
 tabs.on("click", "span.ui-icon-close", function() {
   if ($("#entries").children().length > 1) {
+    var panelid = $(this).parent().find("a").text();
+    var count = $("#" + panelid).find(".pin").length;
+    var ids = [];
+    for (var a = 0; a < count; a++) {
+      ids.push($("#" + panelid).find(".pin").eq(a).find(".id").text())
+    }
+    //var panelId = $(this).closest("li").remove().attr("aria-controls");
     var x = confirm("Do you really want to delete this tab with all pins?");
     if (x) {
-      var panelId = $(this).closest("li").remove().attr("aria-controls");
-      $("#" + panelId).remove();
-      tabs.tabs("refresh");
+      $(this).closest("li").remove().attr("aria-controls");
+      $("#" + panelid).remove();
+      $("#tabs").tabs("destroy");
+      $("#tabs").tabs();
     }
   }
 });
@@ -293,10 +301,16 @@ tabs.on("click", ".field .addnewpin", function() {
 $("#ok").on("click", function() {
   var value = $("#newtab").val();
   if (value !== "") {
+    newtabs.push(value)
     $("#entries").append("<li><a href='" + value + "'>" + value + "</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
     $("#newtab").val("");
-    $("#tabs").append("<div class='field' id='" + value + "'><button class='addnewpin btn btn-success'>Add new pin</button></div>");
-    tabs.tabs("refresh");
+        $("#tabs").tabs("refresh");
+        var tabschildren = $("#tabs").children().length;
+        var newid = $("#tabs").children().eq(tabschildren-1).attr("id")
+        $("#" + newid).addClass("field");
+        $("#" + newid).append("<button class='addnewpin btn btn-success'>Add new pin</button>");
+    //$("#tabs").append("<div id='" + value + "' class='field'><button class='addnewpin btn btn-success'>Add new pin</button></div>");
+    $("#" + value).css("display", "none")
     arr = [];
     for (var j = 0; j < $("#entries").children().length; j++) {
       arr.push($("#entries").children().eq(j).find("a").text()) //to store tabs' order and preserve it
@@ -396,3 +410,10 @@ $("#searchbutton").click(function() {
     }
   }
 })
+
+/*$("ul").on("click", "li", function(){
+  for (var y = 0; y < newtabs.length; y++){
+    if (newtabs[y] === $(this).find("a").text()) $("#" + newtabs[y]).css("display", "inline")
+    else $("#" + newtabs[y]).css("display", "none")
+  }
+})*/

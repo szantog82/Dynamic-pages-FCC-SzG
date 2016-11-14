@@ -5,6 +5,7 @@ var flagfornewpin;
 var mypins = false;
 var changeflagoutput = {};
 var cont;
+var uploadedpic;
 
 var username = document.cookie.replace(/(?:(?:^|.*;\s*)user\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 if (username.length > 1) {
@@ -311,9 +312,10 @@ $("#addnewpinModal").on("click", "#addnewpinsave", function() {
   var output = {};
   $("#addnewpinimg").attr("src", "")
 
-  if (title === "" || pic === "" || link === "") {
+  if (title === "" || (pic === "" && uploadedpic === undefined) || link === "") {
     $("#addnewpinmessage").text("Fill in all forms!")
   } else {
+    if (uploadedpic !== undefined) pic = uploadedpic;
     output = {
       title: title,
       pic: pic,
@@ -322,6 +324,7 @@ $("#addnewpinModal").on("click", "#addnewpinsave", function() {
       flag: flagfornewpin,
       owner: username
     };
+  
     $.ajax({
       url: '/pin/newpin',
       type: "POST",
@@ -349,6 +352,18 @@ $("#addnewpinModal").on("click", "#addnewpinsave", function() {
 $("#addnewpinModal").on("blur", "#newpinpic", function() {
   var pic = $("#newpinpic").val();
   $("#addnewpinimg").attr("src", pic)
+})
+
+$("#addnewpinModal").on("change", "#newfile", function(ev){
+  $("#newpinpic").val("");
+  $("#newpinpic").prop("disabled", true);
+  var f = ev.target.files[0];
+    var fr = new FileReader();
+    fr.onload = function(ev2) {
+        $('#addnewpinimg').attr('src', ev2.target.result);
+        uploadedpic = ev2.target.result;
+    };
+    fr.readAsDataURL(f);
 })
 
 $("#searchbutton").click(function() {

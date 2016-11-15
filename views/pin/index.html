@@ -8,6 +8,7 @@
 
 
 <body>
+  image upload
   <div class="container" id="header">
     <nav class="navbar navbar-inverse">
       <div class="navbar-header">
@@ -22,7 +23,17 @@
       </ul>
     </nav>
     <p><a href="/">Back to homepage</a></p>
-
+    <div id="searchfield"><input type="text" id="search"></input><button class="btn btn-default" id="searchbutton">Search</button></div>
+<div class="form-group" id="selectmenu">
+    <label for="user">Select a user to filter</label>
+    <select class="form-control" id="listofusers">
+      <option>Slower</option>
+      <option>Slow</option>
+      <option selected="selected">Medium</option>
+      <option>Fast</option>
+      <option>Faster</option>
+    </select>
+    </div>
     <button type="button" class="btn btn-default" id="add_tab" data-toggle="modal" data-target="#myModal">Add Tab</button>
     <div class="modal fade" id="myModal" role="dialog">
       <div class="modal-dialog modal-sm">
@@ -79,7 +90,8 @@
           </div>
           <div class="modal-body" id="addnewpinmodalbody">
             <div><img id="addnewpinimg" src="" /></div>
-            Title: <input type="text" class="form-control" id="newpintitle" placeholder="Title comes here" /> Image: <input type="url" class="form-control" id="newpinpic" placeholder="http://example.com/sample.jpg" /> Webpage: <input type="url" class="form-control"
+            Title: <input type="text" class="form-control" id="newpintitle" placeholder="Title comes here" /> Image link: <input type="url" class="form-control" id="newpinpic" placeholder="http://example.com/sample.jpg" /> 
+            or upload <input type="file" class="form-control" id="newfile" /> <input type=Webpage: <input type="url" class="form-control"
               id="newpinlink" placeholder="http://example.com" /> Description (optional): <textarea class="form-control" rows="5" id="newpindescr" placeholder="Description comes here..."></textarea>
             <p id="addnewpinmessage"></p>
           </div>
@@ -95,13 +107,14 @@
       </ul>
     </div>
   </div>
-    <div id="mainmessage"></div>
+    <div id="mainmessage">dfgfdg</div>
 </body>
 
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js'></script>
 <script src='https://code.jquery.com/ui/1.12.1/jquery-ui.min.js'></script>
 <script src='js/masonry.js'></script>
+<script src='js/imagesloaded.js'></script>
 
 <script src="js/index.js"></script>
 

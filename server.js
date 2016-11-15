@@ -10,6 +10,10 @@ var request = require('request')
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var randomstring = require("randomstring");
+var fs = require("fs");
+//var multipart = require("connect-multiparty");
+
+//var multipartMiddleware = multipart();
 
 var d = new Date();
 var secret = process.env.SECRET;
@@ -922,7 +926,6 @@ app.get('/pin/pinit', function(req, res){
               var id = Object.keys(req.query)[0];
               var holder = {};
               holder["mypins." + id] = req.query[id];
-              console.log(holder)
               mongodb.MongoClient.connect(uri, function(err, db) {
                 if (err) throw err;
                 var users = db.collection('users');
@@ -980,6 +983,30 @@ app.get('/pin/unpin', function(req, res){
               })
              }
           })
+})
+
+app.get('/pin/removetab', function(req, res){
+  var tokensent = (req.headers.token).replace(/(?:(?:^|.*;\s*)token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+            jwt.verify(tokensent, secret, function(err, decoded) {
+            if (err) {console.log(err);
+                res.send("denied");
+           }
+             else {
+              var user = decoded.data;
+              mongodb.MongoClient.connect(uri, function(err, db) {
+                if (err) throw err;
+                var users = db.collection('users');
+                var ids = req.query.data;
+                for (var a = 0; a < ids.length; a++) {
+                  var holder = {};
+                  holder["mypins." + ids[a]] = "";
+                  users.update({login: user}, {$unset: holder})
+                }
+                console.log("Pin - removing a tab")
+                res.end();
+              })
+             }
+            })
 })
 
 var listener = http.listen(process.env.PORT, function () {

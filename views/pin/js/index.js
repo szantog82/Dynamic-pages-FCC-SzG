@@ -6,6 +6,7 @@ var mypins = false;
 var changeflagoutput = {};
 var cont;
 var uploadedpic;
+var newtabs = {}; //because of Jquery UI tabs - I could not manage updating them after adding a tab with custom id :(
 
 var username = document.cookie.replace(/(?:(?:^|.*;\s*)user\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 if (username.length > 1) {
@@ -16,6 +17,11 @@ if (username.length > 1) {
 } else {
   loggedin = false;
   $("#mybooks").css("display", "none")
+}
+
+var imgerror = function(actimg){
+  actimg.onerror = '';
+  actimg.src='https://cdn4.iconfinder.com/data/icons/48-bubbles/48/20.Photos-128.png';
 }
 
 var loaddata = function(url) {
@@ -38,7 +44,7 @@ var loaddata = function(url) {
             $("#tabs").append("<div class='field' id='" + flag + "'><button class='addnewpin btn btn-success'>Add new pin</button></div>");
             arr.push(flag)
           }
-          $("#" + flag).append("<div class='pin'><div class='pinmain'><div class='id'>" + props + "</div><div class='image'><img src='" + data[props].pic + "' /></div><h4 class='title'>" + data[props].title + "</h4><p class='description'>" + data[props].descr + "</p><p class='owner'><b>" + data[props].owner + "</b></p></div><button class='changeflag' data-toggle='tooltip' title='Put it to another tab'>" + flag + "</button><a class='link' href='" + data[props].link + "'>" + data[props].link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>")
+          $("#" + flag).append("<div class='pin'><div class='pinmain'><div class='id'>" + props + "</div><div class='image'><img onError='imgerror(this)' src='" + data[props].pic + "' /></div><h4 class='title'>" + data[props].title + "</h4><p class='description'>" + data[props].descr + "</p><p class='owner'><b>" + data[props].owner + "</b></p></div><button class='changeflag' data-toggle='tooltip' title='Put it to another tab'>" + flag + "</button><a class='link' href='" + data[props].link + "'>" + data[props].link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>")
         }
         for (var a = 0; a < arr.length; a++) {
           var $grid = $('#' + flag).masonry({
@@ -50,10 +56,14 @@ var loaddata = function(url) {
         }
       } else {
         cont = data;
+        var allids = [];  //to store loaded ids in order to avoid loading one pin twice
         $("#entries").append("<li><a href='#alltabsfromallusers'>All tabs from All users</a></li>");
         $("#tabs").append("<div class='field' id='alltabsfromallusers'></div>");
         for (var props in data) { //initialize tabs
-          $("#alltabsfromallusers").append("<div class='pin'><div class='pinmain'><div class='id'>" + props + "</div><div class='image'><img src='" + data[props].pic + "' /></div><h4 class='title'>" + data[props].title + "</h4><p class='description'>" + data[props].descr + "</p><p class='owner'><b>" + data[props].owner + "</b></p></div><button class='changeflag'>" + data[props].flag + "</button><a class='link' href='" + data[props].link + "'>" + data[props].link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>")
+          if (allids.indexOf(props) < 0) {
+          $("#alltabsfromallusers").append("<div class='pin'><div class='pinmain'><div class='id'>" + props + "</div><div class='image'><img onError='imgerror(this)' src='" + data[props].pic + "' /></div><h4 class='title'>" + data[props].title + "</h4><p class='description'>" + data[props].descr + "</p><p class='owner'><b>" + data[props].owner + "</b></p></div><button class='changeflag'>" + data[props].flag + "</button><a class='link' href='" + data[props].link + "'>" + data[props].link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>")
+          allids.push(props)
+          }
         }
         var $grid = $('#alltabsfromallusers').masonry({
           itemSelector: '.pin'
@@ -147,14 +157,27 @@ tabs.on("click", "span.ui-icon-close", function() {
     for (var a = 0; a < count; a++) {
       ids.push($("#" + panelid).find(".pin").eq(a).find(".id").text())
     }
-    //var panelId = $(this).closest("li").remove().attr("aria-controls");
     var x = confirm("Do you really want to delete this tab with all pins?");
     if (x) {
       $(this).closest("li").remove().attr("aria-controls");
-      $("#" + panelid).remove();
-      $("#tabs").tabs("destroy");
-      $("#tabs").tabs();
-    }
+      if (newtabs[panelid] === undefined) $("#" + panelid).remove();
+      else {
+        $("#" + newtabs[panelid]).remove();
+        newtabs[panelid] = undefined;
+      }
+      $("#tabs").tabs("refresh");
+      $.ajax({
+        url: '/pin/removetab',
+        method: 'GET',
+        headers: {
+          "token": document.cookie
+        },
+        data: {
+          data: ids
+        },
+        success: function(data, status) {}
+      })
+    } else {}
   }
 });
 
@@ -223,17 +246,13 @@ $("#tabs").on("click", ".pin .changeflag", function() {
     var flag = $(this).parent().find(".changeflag").text();
     changeflagoutput = {};
     changeflagoutput[id] = {
-        title: title,
-        pic: pic,
-        link: link,
-        descr: descr,
-        flag: flag,
-        owner: username
-      }
-      // var offset = $(this).offset();
-      //  var top = offset.top + "px";
-      // var left = offset.left -200 + "px";
-      //   $("#changeflagModal").css({'position': 'absolute', 'top': top, 'bottom': '0', 'right': '0', 'margin': '0px'})
+      title: title,
+      pic: pic,
+      link: link,
+      descr: descr,
+      flag: flag,
+      owner: username
+    }
     $("#changeflagmodalbody").empty();
     $("#changeflagModal").modal();
     for (var x = 0; x < arr.length; x++) {
@@ -267,8 +286,9 @@ $("#changeflagModal").on("click", "#changeflagmodalbody .selectnewflag", functio
     data: changeflagoutput,
     success: function(data, status) {
       $(".id").eq(pos).parent().parent().remove();
-      var $modpin = $("<div class='pin'><div class='pinmain'><div class='id'>" + id + "</div><div class='image'><img src='" + pic + "' /></div><h4 class='title'>" + title + "</h4><p class='description'>" + descr + "</p><p class='owner'><b>" + owner + "</b></p></div><button class='changeflag' data-toggle='tooltip' title='Put it to another tab'>" + flag + "</button><a class='link' href='" + link + "'>" + link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>")
-      $("#" + flag).append($modpin).masonry('appended', $modpin);
+      var $modpin = $("<div class='pin'><div class='pinmain'><div class='id'>" + id + "</div><div class='image'><img onError='imgerror(this)' src='" + pic + "' /></div><h4 class='title'>" + title + "</h4><p class='description'>" + descr + "</p><p class='owner'><b>" + owner + "</b></p></div><button class='changeflag' data-toggle='tooltip' title='Put it to another tab'>" + flag + "</button><a class='link' href='" + link + "'>" + link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>");
+      if (newtabs[flag] === undefined) $("#" + flag).append($modpin).masonry('appended', $modpin);
+      else $("#" + newtabs[flag]).append($modpin).masonry('appended', $modpin);
       $("#changeflagModal").modal("hide");
     }
   })
@@ -301,19 +321,21 @@ tabs.on("click", ".field .addnewpin", function() {
 $("#ok").on("click", function() {
   var value = $("#newtab").val();
   if (value !== "") {
-    newtabs.push(value)
-    $("#entries").append("<li><a href='" + value + "'>" + value + "</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
-    $("#newtab").val("");
-        $("#tabs").tabs("refresh");
-        var tabschildren = $("#tabs").children().length;
-        var newid = $("#tabs").children().eq(tabschildren-1).attr("id")
-        $("#" + newid).addClass("field");
-        $("#" + newid).append("<button class='addnewpin btn btn-success'>Add new pin</button>");
-    //$("#tabs").append("<div id='" + value + "' class='field'><button class='addnewpin btn btn-success'>Add new pin</button></div>");
-    $("#" + value).css("display", "none")
-    arr = [];
-    for (var j = 0; j < $("#entries").children().length; j++) {
-      arr.push($("#entries").children().eq(j).find("a").text()) //to store tabs' order and preserve it
+    if (arr.indexOf(value) > -1) { //Nothing happens if the tab name already exists
+      $("#newtab").val("");
+    } else {
+      $("#entries").append("<li><a href='" + value + "'>" + value + "</a><span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>");
+      $("#newtab").val("");
+      $("#tabs").tabs("refresh");
+      var tabschildren = $("#tabs").children().length;
+      var newid = $("#tabs").children().eq(tabschildren - 1).attr("id")
+      newtabs[value] = newid;
+      $("#" + newid).addClass("field");
+      $("#" + newid).append("<button class='addnewpin btn btn-success'>Add new pin</button>");
+      arr = [];
+      for (var j = 0; j < $("#entries").children().length; j++) {
+        arr.push($("#entries").children().eq(j).find("a").text()) //to store tabs' order and preserve it
+      }
     }
   }
 })
@@ -338,7 +360,7 @@ $("#addnewpinModal").on("click", "#addnewpinsave", function() {
       flag: flagfornewpin,
       owner: username
     };
-  
+
     $.ajax({
       url: '/pin/newpin',
       type: "POST",
@@ -354,7 +376,7 @@ $("#addnewpinModal").on("click", "#addnewpinsave", function() {
         })
         setTimeout(function() {
           $("#addnewpinModal").modal("hide");
-          var $newpin = $("<div class='pin'><div class='pinmain'><div class='image'><img src='" + pic + "' /></div><h4>" + title + "</h4><p class='description'>" + descr + "</p><p class='owner'><b>" + username + "</b></p><p>" + flagfornewpin + "</p></div><a href='" + link + "'>" + link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>");
+          var $newpin = $("<div class='pin'><div class='pinmain'><div class='image'><img onError='imgerror(this)' src='" + pic + "' /></div><h4>" + title + "</h4><p class='description'>" + descr + "</p><p class='owner'><b>" + username + "</b></p><p>" + flagfornewpin + "</p></div><a href='" + link + "'>" + link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>");
           $("#" + flagfornewpin).append($newpin).masonry('appended', $newpin);
           $("#changeflagModal").modal("hide");
         }, 500)
@@ -368,16 +390,16 @@ $("#addnewpinModal").on("blur", "#newpinpic", function() {
   $("#addnewpinimg").attr("src", pic)
 })
 
-$("#addnewpinModal").on("change", "#newfile", function(ev){
+$("#addnewpinModal").on("change", "#newfile", function(ev) {
   $("#newpinpic").val("");
   $("#newpinpic").prop("disabled", true);
   var f = ev.target.files[0];
-    var fr = new FileReader();
-    fr.onload = function(ev2) {
-        $('#addnewpinimg').attr('src', ev2.target.result);
-        uploadedpic = ev2.target.result;
-    };
-    fr.readAsDataURL(f);
+  var fr = new FileReader();
+  fr.onload = function(ev2) {
+    $('#addnewpinimg').attr('src', ev2.target.result);
+    uploadedpic = ev2.target.result;
+  };
+  fr.readAsDataURL(f);
 })
 
 $("#searchbutton").click(function() {
@@ -389,7 +411,7 @@ $("#searchbutton").click(function() {
     $("#tabs").append("<div class='field' id='" + search + "'></div>");
     for (var props in cont) {
       if (keyword.test(cont[props].title.toLowerCase()) || keyword.test(cont[props].descr.toLowerCase())) {
-        $("#" + search).append("<div class='pin'><div class='pinmain'><div class='id'>" + props + "</div><div class='image'><img src='" + cont[props].pic + "' /></div><h4 class='title'>" + cont[props].title + "</h4><p class='description'>" + cont[props].descr + "</p><p class='owner'><b>" + cont[props].owner + "</b></p></div><button class='changeflag'>" + cont[props].flag + "</button><a class='link' href='" + cont[props].link + "'>" + cont[props].link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>")
+        $("#" + search).append("<div class='pin'><div class='pinmain'><div class='id'>" + props + "</div><div class='image'><img onError='imgerror(this)' src='" + cont[props].pic + "' /></div><h4 class='title'>" + cont[props].title + "</h4><p class='description'>" + cont[props].descr + "</p><p class='owner'><b>" + cont[props].owner + "</b></p></div><button class='changeflag'>" + cont[props].flag + "</button><a class='link' href='" + cont[props].link + "'>" + cont[props].link + "</a><button class='pinit'>Pin it!</button><button class='unpinit'>Unpin!</button></div>")
         count++;
       }
     }
@@ -410,10 +432,3 @@ $("#searchbutton").click(function() {
     }
   }
 })
-
-/*$("ul").on("click", "li", function(){
-  for (var y = 0; y < newtabs.length; y++){
-    if (newtabs[y] === $(this).find("a").text()) $("#" + newtabs[y]).css("display", "inline")
-    else $("#" + newtabs[y]).css("display", "none")
-  }
-})*/

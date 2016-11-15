@@ -53,9 +53,10 @@ app.get('/signup', function(req,res){
 app.post('/signup', function(req, res){
   loginmatch = false;
   var login = req.body.login;
+  var email = req.body.email;
   var password = req.body.password;
-  if (login.length < 5 || password.length < 5) {
-    res.send("<html><body><p>Too short login/password - try again - redirecting to back...</p></body><script>setTimeout(function(){window.location = '/signup'},1000)</script></html>")
+  if (login.length < 5 || password.length < 5 || email.length < 5) {
+    res.send("<html><body><p>Too short login/password or bady e-mail - try again - redirecting to back...</p></body><script>setTimeout(function(){window.location = '/signup'},1000)</script></html>")
   }
   else {mongodb.MongoClient.connect(uri, function(err, db) {
             if (err) throw err;
@@ -68,6 +69,7 @@ app.post('/signup', function(req, res){
               var hashedpassword = bcrypt.hashSync(password, 10);
               users.insert({
                "login": login,
+               "email": email,
                "password": hashedpassword,
                "date": d.toLocaleString()
               });

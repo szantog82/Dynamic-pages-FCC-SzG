@@ -139,6 +139,7 @@ var loaddata = function(url) {
 
 if (loggedin) {
   mybooks = true;
+  $("#searchdiv").css("visibility", "hidden");
   $(".line").css("display", "inline");
   $("#navleft").empty();
   $("#navleft").append("<li><a href='#borrowed'>My borrowed books</a></li>");
@@ -147,11 +148,15 @@ if (loggedin) {
   $("#navleft").append("<li><a href='#' data-toggle='modal' data-target='#myModal' id='approval'>Waiting for my approval</a></li>");
   $("#navleft").append("<li><a href='#' data-toggle='modal' data-target='#myModal' id='profile'>My profile</a></li>");
   loaddata("/book/my")
-} else loaddata("/book/all");
+} else {
+  loaddata("/book/all");
+  $("#searchdiv").css("visibility", "visible");
+}
 
 $("#allbooks").click(function() {
   mybooks = false;
   $(".line").css("display", "none");
+  $("#searchdiv").css("visibility", "visible");
   $("#navleft").empty();
   loaddata("/book/all")
 })
@@ -160,6 +165,7 @@ $("#mybooks").click(function() {
   if (loggedin) {
     mybooks = true;
     $(".line").css("display", "inline");
+    $("#searchdiv").css("visibility", "hidden");
     $("#navleft").empty();
     $("#navleft").append("<li><a href='#borrowed'>My borrowed books</a></li>");
     $("#navleft").append("<li><a href='#lent'>My lent books</a></li>");
@@ -325,3 +331,26 @@ var accept = function(x) {
 var reject = function(x) {
   $(x).parent().parent().find(".feedback").html("<i>Rejected!</i>")
 }
+
+$("#searchbutton").click(function(){
+  var searchword = $("#searchfield").val();
+  if (searchword.length > 1){
+    $("#searchfield").val("");
+    var keyword = new RegExp(searchword.toLowerCase());
+    for (var c = 0; c < $(".item").length; c++) {
+      var acttitle = $(".item").eq(c).find(".title").text();
+      var actdescr = $(".item").eq(c).find(".descr").text();
+      if (keyword.test(acttitle.toLowerCase())) {}
+      
+      else {
+        $(".item").eq(c).css("display", "none");
+      }
+    }
+  }
+})
+
+$("#showall").click(function(){
+  for (var c = 0; c < $(".item").length; c++) {
+     $(".item").eq(c).css("display", "inline-block");
+  }
+})
